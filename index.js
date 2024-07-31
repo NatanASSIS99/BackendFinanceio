@@ -1,13 +1,17 @@
-import express from 'express'; // Certifique-se de usar import se estiver configurado para módulos ES
+import express from 'express';
+import userRoutes from './routes/users.js'; // Certifique-se de que o caminho está correto
+
 const app = express();
-const port = 8080;
 
-app.use(express.json()); 
+app.use(express.json()); // Middleware para analisar JSON
 
-app.get('/health', (_, res) => {
-  res.send('Hello World!');
+// Rotas
+app.use('/user', userRoutes);
+
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(8080, () => {
-  console.log(`servidor rodando na porta 8080`);
-});
+export default app;
