@@ -3,11 +3,18 @@ import { getAll, get, save, remove, update } from './index.js'; // Certifique-se
 
 const router = express.Router();
 
+// Função utilitária para remover a senha do objeto do usuário
+const removePassword = (user) => {
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+};
+
 // Rota para obter todos os usuários
 router.get('/', async (req, res) => {
     try {
         const users = await getAll();
-        res.json(users);
+        const usersWithoutPasswords = users.map(removePassword);
+        res.json(usersWithoutPasswords);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch users' });
     }
@@ -18,7 +25,7 @@ router.get('/:id', async (req, res) => {
     try {
         const user = await get(req.params.id);
         if (user) {
-            res.json(user);
+            res.json(removePassword(user));
         } else {
             res.status(404).json({ error: 'User not found' });
         }
@@ -52,15 +59,13 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-
-
-
 // Rota para atualizar um usuário por ID
 router.put('/:id', async (req, res) => {
     try {
         const result = await update(req.params.id, req.body);
         if (result) {
-            res.json({ message: 'User updated' });
+            const updatedUser = await get(req.params.id); // Recarregar o usuário atualizado
+            res.json(removePassword(updatedUser));
         } else {
             res.status(404).json({ error: 'User not found' });
         }
