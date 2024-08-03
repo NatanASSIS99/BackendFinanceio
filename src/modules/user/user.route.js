@@ -1,76 +1,50 @@
-import express from 'express';
-import { getAll, get, save, remove, update } from './index.js'; // Certifique-se de que o caminho está correto
+import { Router } from 'express';
+import { getAll, get, save, remove, update } from './index.js';  // Certifique-se de que todos esses métodos estão exportados corretamente
 
-const router = express.Router();
+const router = Router();
 
-// Função utilitária para remover a senha do objeto do usuário
-const removePassword = (user) => {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-};
-
-// Rota para obter todos os usuários
 router.get('/', async (req, res) => {
     try {
-        const users = await getAll();
-        const usersWithoutPasswords = users.map(removePassword);
-        res.json(usersWithoutPasswords);
+        const data = await getAll();
+        res.status(200).json({ data });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch users' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Rota para obter um usuário por ID
 router.get('/:id', async (req, res) => {
     try {
-        const user = await get(req.params.id);
-        if (user) {
-            res.json(removePassword(user));
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
+        const data = await get(req.params.id);
+        res.status(200).json({ data });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch user' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Rota para criar um novo usuário
 router.post('/', async (req, res) => {
     try {
-        const userId = await save(req.body);
-        res.status(201).json({ id: userId });
+        const data = await save(req.body);  // Corrigido de put para save
+        res.status(200).json({ data });
     } catch (error) {
-        console.error('Error in route:', error.message);
-        res.status(500).json({ error: 'Failed to create user' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Rota para remover um usuário por ID
 router.delete('/:id', async (req, res) => {
     try {
-        const result = await remove(req.params.id);
-        if (result) {
-            res.json({ message: 'User deleted' });
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
+        const data = await remove(req.params.id);
+        res.status(200).json({ data });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete user' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Rota para atualizar um usuário por ID
 router.put('/:id', async (req, res) => {
     try {
-        const result = await update(req.params.id, req.body);
-        if (result) {
-            const updatedUser = await get(req.params.id); // Recarregar o usuário atualizado
-            res.json(removePassword(updatedUser));
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
+        const data = await update(req.params.id, req.body);  // Corrigido de uptade para update e adicionando req.body
+        res.status(200).json({ data });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update user' });
+        res.status(500).json({ error: error.message });
     }
 });
 

@@ -1,72 +1,35 @@
-import bcrypt from 'bcrypt';
-import knexService from '../../services/knex.js';
+import db from '../../services/knex.js'; // Ajuste o caminho conforme necessário
+import bcrypt from 'bcrypt'; // Certifique-se de importar bcrypt
 
-// Função para obter todos os usuários
-export const getAll = async () => {
-    try {
-        const result = await knexService('users').select('*').debug();
-        console.log('Query:', knexService('users').select('*').toQuery());
-        return result;
-    } catch (error) {
-        console.error('Error in getAll:', error.message);
-        throw error;
-    }
+export const getAll = () => {
+    return db('users').select(
+        'id',
+        'name',
+        'email',
+        'created_at',
+        'update_at'
+    );
 };
 
-// Função para obter um usuário por ID
-export const get = async (id) => {
-    try {
-        const result = await knexService('users').where({ id }).first().debug();
-        console.log('Query:', knexService('users').where({ id }).first().toQuery());
-        return result;
-    } catch (error) {
-        console.error('Error in get:', error.message);
-        throw error;
-    }
+export const get = (id) => {
+    return db('users')
+    .where({ id })
+    .select('id', 'name', 'email', 'created_at', 'update_at')
+    .first();
 };
 
-// Função para salvar um novo usuário
-export const save = async (params) => {
-    try {
-        const hashedPassword = bcrypt.hashSync(params.password, 10);
-        const userData = { ...params, password: hashedPassword };
-        const [userId] = await knexService('users').insert(userData).debug();
-        console.log('User ID:', userId);
-        return userId;
-    } catch (error) {
-        console.error('Error in save:', error.message);
-        throw error;
-    }
+export const save = (params) => {
+    params.password = bcrypt.hashSync(params.password, 10);  // Corrigido de put para save
+    return db('users').insert(params);
 };
 
-// Função para remover um usuário por ID
-export const remove = async (id) => {
-    try {
-        const result = await knexService('users').where({ id }).del().debug();
-        console.log('Query:', knexService('users').where({ id }).del().toQuery());
-        return result;
-    } catch (error) {
-        console.error('Error in remove:', error.message);
-        throw error;
-    }
+export const remove = (id) => {
+    return db('users').where({ id }).delete();
 };
 
-// Função para atualizar um usuário por ID
-export const update = async (id, params) => {
-    try {
-        const allowedColumns = ['username', 'email', 'password', 'role'];
-        const updateData = Object.keys(params)
-            .filter(key => allowedColumns.includes(key))
-            .reduce((obj, key) => {
-                obj[key] = params[key];
-                return obj;
-            }, {});
-
-        const result = await knexService('users').where({ id }).update(updateData).debug();
-        console.log('Query:', knexService('users').where({ id }).update(updateData).toQuery());
-        return result;
-    } catch (error) {
-        console.error('Error in update:', error.message);
-        throw error;
+export const update = (id, params) => {
+    if (params.password) {
+        params.password = bcrypt.hashSync(params.password, 10);  // Se a senha for fornecida, criptografá-la
     }
+    return db('users').where({ id }).update(params);
 };
