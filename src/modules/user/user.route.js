@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAll, get, save, remove, update } from './index.js';  // Certifique-se de que todos esses métodos estão exportados corretamente
+import { getAll, get, save, remove, update } from './user.model.js';
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const data = await save(req.body);  // Corrigido de put para save
+        const data = await save(req.body);
         res.status(200).json({ data });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -41,7 +41,7 @@ router.delete('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const data = await update(req.params.id, req.body);  // Corrigido de uptade para update e adicionando req.body
+        const data = await update(req.params.id, req.body);
         res.status(200).json({ data });
     } catch (error) {
         res.status(500).json({ error: error.message });

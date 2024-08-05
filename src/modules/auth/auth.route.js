@@ -1,21 +1,24 @@
-import { Router } from 'express';
-import {getAll, get, put, remove } from './index.js';
-import { login, register } from './index.js'
+import express from 'express';
+import { login, register } from './auth.service.js';
 
-
-const router = Router();
+const router = express.Router();
 
 router.post('/login', async (req, res) => {
-    const data = await login (req.boby);
-    res.status(200).json({data});
+    try {
+        const result = await login(req.body);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
-router.get('/register', async (req, res) => {
-    const data = await register(req.boby);
-    res.status(200).json({data});
+router.post('/register', async (req, res) => {
+    try {
+        const user = await register(req.body);
+        res.status(201).json(user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
-
-
-
 
 export default router;
